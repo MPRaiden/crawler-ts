@@ -52,3 +52,24 @@ export function getFirstParagraphFromHTML(html: string): string {
   return ""
 }
 
+export function getURLsFromHTML(html: string, baseURL: string): string[] {
+  const urls: string[] = []
+
+  const dom = new JSDOM(html)
+
+  const anchors = dom.window.document.querySelectorAll("a")
+  const imgs = dom.window.document.querySelectorAll("img")
+
+  for (const anchor of anchors) {
+    const attributeVal = anchor.getAttribute("href")
+    if (attributeVal) urls.push(attributeVal)
+  }
+
+  for (const img of imgs) {
+    const imgSrc = img.getAttribute("src")
+    if (imgSrc) urls.push(imgSrc)
+  }
+
+  return urls
+}
+
