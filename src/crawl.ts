@@ -1,4 +1,5 @@
 import { JSDOM } from 'jsdom'
+import { ExtractedPageData } from './types'
 /**
 Returns normalized url containing only hostname plus pathname.
 
@@ -91,3 +92,14 @@ export function getIMGsFromHTML(html: string, baseURL: string): string[] {
 
   return urls
 }
+
+export function extractPageData(html: string, pageURL: string): ExtractedPageData {
+  return {
+    url: pageURL,
+    h1: getFirstH1FromHtml(html),
+    first_paragraph: getFirstParagraphFromHTML(html),
+    outgoing_links: getURLsFromHTML(html, pageURL),
+    image_urls: getIMGsFromHTML(html, pageURL)
+  }
+}
+

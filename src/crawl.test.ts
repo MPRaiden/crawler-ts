@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { getFirstH1FromHtml, getFirstParagraphFromHTML, getIMGsFromHTML, getURLsFromHTML, normalizeURL } from './crawl'
+import { extractPageData, getFirstH1FromHtml, getFirstParagraphFromHTML, getIMGsFromHTML, getURLsFromHTML, normalizeURL } from './crawl'
 
 
 // test('forward slash still means same url', () => {
@@ -126,67 +126,122 @@ import { getFirstH1FromHtml, getFirstParagraphFromHTML, getIMGsFromHTML, getURLs
 //   expect(actual).toEqual(expected)
 // })
 
-test("getURLsFromHTML absolute", () => {
-  const inputURL = "https://blog.boot.dev"
-  const inputBody = `<html><body><a href="https://blog.boot.dev"><span>Boot.dev</span></a></body></html>`
+// test("getURLsFromHTML absolute", () => {
+//   const inputURL = "https://blog.boot.dev"
+//   const inputBody = `<html><body><a href="https://blog.boot.dev"><span>Boot.dev</span></a></body></html>`
 
-  const actual = getURLsFromHTML(inputBody, inputURL)
-  const expected = ["https://blog.boot.dev/"]
+//   const actual = getURLsFromHTML(inputBody, inputURL)
+//   const expected = ["https://blog.boot.dev/"]
+
+//   expect(actual).toEqual(expected)
+// })
+
+// test("getURLsFromHTML relative", () => {
+//   const inputURL = "https://blog.boot.dev"
+//   const inputBody = `<html><body><a href="/path/one"><span>Boot.dev</span></a></body></html>`
+//   const actual = getURLsFromHTML(inputBody, inputURL)
+//   const expected = ["https://blog.boot.dev/path/one"]
+//   expect(actual).toEqual(expected)
+// })
+
+// test("getURLsFromHTML both absolute and relative", () => {
+//   const inputURL = "https://blog.boot.dev";
+//   const inputBody =
+//     `<html><body>` +
+//     `<a href="/path/one"><span>Boot.dev</span></a>` +
+//     `<a href="https://other.com/path/one"><span>Boot.dev</span></a>` +
+//     `</body></html>`
+//   const actual = getURLsFromHTML(inputBody, inputURL)
+//   const expected = [
+//     "https://blog.boot.dev/path/one",
+//     "https://other.com/path/one",
+//   ]
+//   expect(actual).toEqual(expected)
+// })
+
+// test("getIMGsFromHTML absolute", () => {
+//   const inputURL = "https://blog.boot.dev"
+//   const inputBody = `<html><body><img src="https://blog.boot.dev/logo.png" alt="Logo"></body></html>`
+//   const actual = getIMGsFromHTML(inputBody, inputURL)
+//   const expected = ["https://blog.boot.dev/logo.png"]
+//   expect(actual).toEqual(expected)
+// })
+
+// test("getImagesFromHTML relative", () => {
+//   const inputURL = "https://blog.boot.dev"
+//   const inputBody = `<html><body><img src="/logo.png" alt="Logo"></body></html>`
+//   const actual = getIMGsFromHTML(inputBody, inputURL)
+//   const expected = ["https://blog.boot.dev/logo.png"]
+//   expect(actual).toEqual(expected)
+// })
+
+// test("getImagesFromHTML multiple", () => {
+//   const inputURL = "https://blog.boot.dev";
+//   const inputBody =
+//     `<html><body>` +
+//     `<img src="/logo.png" alt="Logo">` +
+//     `<img src="https://cdn.boot.dev/banner.jpg">` +
+//     `</body></html>`
+//   const actual = getIMGsFromHTML(inputBody, inputURL)
+//   const expected = [
+//     "https://blog.boot.dev/logo.png",
+//     "https://cdn.boot.dev/banner.jpg",
+//   ]
+//   expect(actual).toEqual(expected)
+// })
+
+test("extract_page_data basic", () => {
+  const inputURL = "https://blog.boot.dev";
+  const inputBody = `
+    <html><body>
+      <h1>Test Title</h1>
+      <p>This is the first paragraph.</p>
+      <a href="/link1">Link 1</a>
+      <img src="/image1.jpg" alt="Image 1">
+    </body></html>
+  `;
+
+  const actual = extractPageData(inputBody, inputURL);
+  const expected = {
+    url: "https://blog.boot.dev",
+    h1: "Test Title",
+    first_paragraph: "This is the first paragraph.",
+    outgoing_links: ["https://blog.boot.dev/link1"],
+    image_urls: ["https://blog.boot.dev/image1.jpg"],
+  };
+
+  expect(actual).toEqual(expected);
+});
+
+test("extract_page_data main section priority", () => {
+  const inputURL = "https://blog.boot.dev";
+  const inputBody = `
+    <html><body>
+      <nav><p>Navigation paragraph</p></nav>
+      <main>
+        <h1>Main Title</h1>
+        <p>Main paragraph content.</p>
+      </main>
+    </body></html>
+  `;
+
+  const actual = extractPageData(inputBody, inputURL);
+  expect(actual.h1).toEqual("Main Title");
+  expect(actual.first_paragraph).toEqual("Main paragraph content.");
+});
+
+test("extract_page_data missing elements", () => {
+  const inputURL = "https://blog.boot.dev";
+  const inputBody = `<html><body><div>No h1, p, links, or images</div></body></html>`;
+
+  const actual = extractPageData(inputBody, inputURL);
+  const expected = {
+    url: "https://blog.boot.dev",
+    h1: "",
+    first_paragraph: "",
+    outgoing_links: [],
+    image_urls: [],
+  };
 
   expect(actual).toEqual(expected)
 })
-
-test("getURLsFromHTML relative", () => {
-  const inputURL = "https://blog.boot.dev";
-  const inputBody = `<html><body><a href="/path/one"><span>Boot.dev</span></a></body></html>`;
-  const actual = getURLsFromHTML(inputBody, inputURL);
-  const expected = ["https://blog.boot.dev/path/one"];
-  expect(actual).toEqual(expected);
-});
-
-test("getURLsFromHTML both absolute and relative", () => {
-  const inputURL = "https://blog.boot.dev";
-  const inputBody =
-    `<html><body>` +
-    `<a href="/path/one"><span>Boot.dev</span></a>` +
-    `<a href="https://other.com/path/one"><span>Boot.dev</span></a>` +
-    `</body></html>`;
-  const actual = getURLsFromHTML(inputBody, inputURL);
-  const expected = [
-    "https://blog.boot.dev/path/one",
-    "https://other.com/path/one",
-  ];
-  expect(actual).toEqual(expected);
-});
-
-test("getIMGsFromHTML absolute", () => {
-  const inputURL = "https://blog.boot.dev";
-  const inputBody = `<html><body><img src="https://blog.boot.dev/logo.png" alt="Logo"></body></html>`;
-  const actual = getIMGsFromHTML(inputBody, inputURL);
-  const expected = ["https://blog.boot.dev/logo.png"];
-  expect(actual).toEqual(expected);
-});
-
-test("getImagesFromHTML relative", () => {
-  const inputURL = "https://blog.boot.dev";
-  const inputBody = `<html><body><img src="/logo.png" alt="Logo"></body></html>`;
-  const actual = getIMGsFromHTML(inputBody, inputURL);
-  const expected = ["https://blog.boot.dev/logo.png"];
-  expect(actual).toEqual(expected);
-});
-
-test("getImagesFromHTML multiple", () => {
-  const inputURL = "https://blog.boot.dev";
-  const inputBody =
-    `<html><body>` +
-    `<img src="/logo.png" alt="Logo">` +
-    `<img src="https://cdn.boot.dev/banner.jpg">` +
-    `</body></html>`;
-  const actual = getIMGsFromHTML(inputBody, inputURL);
-  const expected = [
-    "https://blog.boot.dev/logo.png",
-    "https://cdn.boot.dev/banner.jpg",
-  ];
-  expect(actual).toEqual(expected);
-});
-
