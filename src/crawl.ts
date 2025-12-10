@@ -54,22 +54,40 @@ export function getFirstParagraphFromHTML(html: string): string {
 
 export function getURLsFromHTML(html: string, baseURL: string): string[] {
   const urls: string[] = []
-
   const dom = new JSDOM(html)
-
   const anchors = dom.window.document.querySelectorAll("a")
-  const imgs = dom.window.document.querySelectorAll("img")
 
   for (const anchor of anchors) {
-    const attributeVal = anchor.getAttribute("href")
-    if (attributeVal) urls.push(attributeVal)
-  }
+    const hrefValue = anchor.getAttribute("href")
+    if (!hrefValue) continue
 
-  for (const img of imgs) {
-    const imgSrc = img.getAttribute("src")
-    if (imgSrc) urls.push(imgSrc)
+    try {
+      const absURL = new URL(hrefValue, baseURL).toString()
+      urls.push(absURL)
+    } catch (err) {
+      console.error(`invalid href -> ${hrefValue}. Error:\n${err}`)
+    }
   }
 
   return urls
 }
 
+export function getIMGsFromHTML(html: string, baseURL: string): string[] {
+  const urls: string[] = []
+  const dom = new JSDOM(html)
+  const imgs = dom.window.document.querySelectorAll("img")
+
+  for (const img of imgs) {
+    const imgSrc = img.getAttribute("src")
+    if (!imgSrc) continue
+
+    try {
+      const absURL = new URL(imgSrc, baseURL).toString()
+      urls.push(absURL)
+    } catch (err) {
+      console.error(`invalid img source -> ${imgSrc}. Error:\n${err}`)
+    }
+  }
+
+  return urls
+}
