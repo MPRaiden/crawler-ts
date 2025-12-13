@@ -103,3 +103,26 @@ export function extractPageData(html: string, pageURL: string): ExtractedPageDat
   }
 }
 
+export async function getHTML(url: string) {
+  try {
+    const res = await fetch(url,
+      { headers: { 'User-Agent': 'BootCrawler/1.0' } }
+    )
+
+    if (res.status >= 400) {
+      console.error(`Response status code not ok, code -> ${res.status}`)
+      return
+    }
+
+    if (!res.headers.get('content-type')?.includes('text/html')) {
+      console.error(`Response content type not txt/html -> ${res.headers.get('content-type')}`)
+      return
+    }
+
+    const result = await res.text()
+    console.log(result)
+  } catch (err) {
+    console.error(`function getHTML() - Errored out:\n${err}`)
+  }
+}
+
