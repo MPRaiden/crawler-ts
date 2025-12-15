@@ -126,3 +126,22 @@ export async function getHTML(url: string) {
   }
 }
 
+export function crawlPage(
+  baseURL: string,
+  currentURL: string = baseURL,
+  pages: Record<string, number> = {},
+) {
+  const baseURLDomain = normalizeURL(baseURL)
+  const currentURLDomain = normalizeURL(currentURL)
+
+  if (baseURLDomain !== currentURLDomain) {
+    console.log("we're done here")
+    return
+  }
+
+  if (Object.keys(pages).includes(currentURLDomain)) {
+    pages[currentURLDomain]++
+    return pages
+  }
+}
+

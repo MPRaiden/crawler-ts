@@ -1,5 +1,5 @@
 import { argv } from "process";
-import { getHTML } from "./crawl"
+import { crawlPage, getHTML } from "./crawl"
 
 
 async function main() {
@@ -15,7 +15,8 @@ async function main() {
 
   const BASE_URL = argv[2]
   console.log(`Crawler starting work on ${BASE_URL}`)
-  await getHTML(BASE_URL)
+  // await getHTML(BASE_URL)
+  crawlPage(BASE_URL)
 }
 
 await main()
