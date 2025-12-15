@@ -146,6 +146,7 @@ export async function crawlPage(
 
   if (Object.keys(pages).includes(normCurrentURL)) {
     pages[normCurrentURL]++
+    // Since this url was already seen, we dont need to crawl it again so we return the pages
     return pages
   } else {
     pages[normCurrentURL] = 1
