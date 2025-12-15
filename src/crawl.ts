@@ -1,5 +1,6 @@
 import { JSDOM } from 'jsdom'
 import { ExtractedPageData } from './types'
+
 /**
 Returns normalized url containing only hostname plus pathname.
 
@@ -10,7 +11,11 @@ export function normalizeURL(url: string): string {
   const urlObject = new URL(url)
 
   const hostname = urlObject.hostname
-  const path = urlObject.pathname
+  let path = urlObject.pathname
+
+  if (path !== "/" && path.endsWith("/")) {
+    path = path.slice(0, -1)
+  }
 
   return `${hostname}${path}`
 }
@@ -119,29 +124,45 @@ export async function getHTML(url: string) {
       return
     }
 
-    const result = await res.text()
-    console.log(result)
+    return await res.text()
   } catch (err) {
     console.error(`function getHTML() - Errored out:\n${err}`)
   }
 }
 
-export function crawlPage(
+export async function crawlPage(
   baseURL: string,
   currentURL: string = baseURL,
   pages: Record<string, number> = {},
 ) {
-  const baseURLDomain = normalizeURL(baseURL)
-  const currentURLDomain = normalizeURL(currentURL)
+  const baseURLDomain = new URL(baseURL).hostname
+  const currentURLDomain = new URL(currentURL).hostname
+
+  const normCurrentURL = normalizeURL(currentURL)
 
   if (baseURLDomain !== currentURLDomain) {
-    console.log("we're done here")
-    return
-  }
-
-  if (Object.keys(pages).includes(currentURLDomain)) {
-    pages[currentURLDomain]++
     return pages
   }
+
+  if (Object.keys(pages).includes(normCurrentURL)) {
+    pages[normCurrentURL]++
+    return pages
+  } else {
+    pages[normCurrentURL] = 1
+  }
+
+  const html = await getHTML(currentURL)
+  if (!html) {
+    return pages
+  }
+  console.log(html, "\n\n")
+
+  const urls = getURLsFromHTML(html, currentURL)
+
+  for (let i = 0; i < urls.length; i++) {
+    pages = await crawlPage(baseURL, urls[i], pages)
+  }
+
+  return pages
 }
 
