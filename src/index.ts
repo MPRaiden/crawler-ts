@@ -15,7 +15,6 @@ async function main() {
 
   const BASE_URL = argv[2]
   console.log(`Crawler starting work on ${BASE_URL}`)
-  // await getHTML(BASE_URL)
   const pages = await crawlPage(BASE_URL)
   console.log(pages)
 }

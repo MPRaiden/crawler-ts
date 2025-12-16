@@ -156,7 +156,6 @@ export async function crawlPage(
   if (!html) {
     return pages
   }
-  console.log(html, "\n\n")
 
   const urls = getURLsFromHTML(html, currentURL)
 
