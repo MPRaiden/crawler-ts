@@ -1,10 +1,17 @@
 import pLimit from 'p-limit';
 import { getURLsFromHTML, normalizeURL } from './crawl';
 
+
 export class ConcurentCrawler {
   baseURL: string;
   pages: Record<string, number> = {};
   limit: Function;
+
+  constructor(url: string, maxConcurency: number = 3) {
+    this.baseURL = url
+    this.pages = {}
+    this.limit = pLimit(maxConcurency)
+  }
 
   private addPageVisit(normalizedURL: string): boolean {
     if (Object.keys(this.pages).includes(normalizedURL)) {
@@ -61,7 +68,6 @@ export class ConcurentCrawler {
     }
     const urls = getURLsFromHTML(html, this.baseURL)
 
-
     const crawls = urls.map(url => this.crawlPage(url))
     await Promise.all(crawls)
   }
@@ -70,11 +76,10 @@ export class ConcurentCrawler {
     await this.crawlPage(this.baseURL)
     return this.pages
   }
+}
 
-  constructor(url: string, maxConcurency: number) {
-    this.baseURL = url
-    this.pages = {}
-    this.limit = pLimit(maxConcurency)
-  }
+export async function crawlSiteAsync(url: string, maxConcurency: number) {
+  const crawler = new ConcurentCrawler(url, maxConcurency)
+  return await crawler.crawl()
 }
 

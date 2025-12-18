@@ -1,5 +1,5 @@
 import { argv } from "process";
-import { crawlSiteAsync } from "./crawl"
+import { crawlSiteAsync } from "./concurency";
 
 
 async function main() {

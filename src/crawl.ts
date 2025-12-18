@@ -1,6 +1,5 @@
 import { JSDOM } from 'jsdom'
 import { ExtractedPageData } from './types'
-import { ConcurentCrawler } from './concurency'
 
 /**
 Returns normalized url containing only hostname plus pathname.
@@ -158,17 +157,12 @@ export async function crawlPage(
     return pages
   }
 
-  const urls = getURLsFromHTML(html, currentURL)
+  const urls = getURLsFromHTML(html, baseURL)
 
   for (let i = 0; i < urls.length; i++) {
     pages = await crawlPage(baseURL, urls[i], pages)
   }
 
   return pages
-}
-
-export async function crawlSiteAsync(url: string, maxConcurency: number) {
-  const crawler = new ConcurentCrawler(url, maxConcurency)
-  return await crawler.crawl()
 }
 
