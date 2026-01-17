@@ -4,12 +4,12 @@ import { crawlSiteAsync } from "./concurency";
 
 async function main() {
   if (argv.length < 3) {
-    console.error(`function main() - not enough arguments:\n${argv.length}`)
+    console.error(`Not enough arguments, You provided: ${argv.length}, please provide 3.`)
     process.exit(1)
   }
 
   if (argv.length > 3) {
-    console.error(`function main() - too many arguments:\n${argv.length}`)
+    console.error(`Too many arguments, You provided: ${argv.length}, please provide 3.`)
     process.exit(1)
   }
 
