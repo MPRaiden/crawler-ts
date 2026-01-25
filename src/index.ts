@@ -10,8 +10,10 @@ async function main() {
 
   const BASE_URL = argv[2]
   const MAX_CONCURENCY = Number(argv[3])
+  const MAX_PAGES = Number(argv[4])
+
   console.log(`Crawler starting work on ${BASE_URL}`)
-  const pages = await crawlSiteAsync(BASE_URL, MAX_CONCURENCY)
+  const pages = await crawlSiteAsync(BASE_URL, MAX_CONCURENCY, MAX_PAGES)
   console.log(pages)
 }
 
