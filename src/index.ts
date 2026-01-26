@@ -1,5 +1,6 @@
 import { argv } from "process";
 import { crawlSiteAsync } from "./concurency";
+import { writeCSVReport } from "./report";
 
 
 async function main() {
@@ -14,7 +15,8 @@ async function main() {
 
   console.log(`Crawler starting work on ${BASE_URL}`)
   const pages = await crawlSiteAsync(BASE_URL, MAX_CONCURENCY, MAX_PAGES)
-  console.log(pages)
+
+  writeCSVReport(pages, "report.csv")
 }
 
 await main()
