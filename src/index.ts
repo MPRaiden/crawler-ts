@@ -15,6 +15,11 @@ async function main() {
 
   console.log(`Crawler starting work on ${BASE_URL}`)
   const pages = await crawlSiteAsync(BASE_URL, MAX_CONCURENCY, MAX_PAGES)
+  console.log("Finished crawling.");
+  const firstPage = Object.values(pages)[0];
+  if (firstPage) {
+    console.log(`First page record: ${firstPage["url"]} - ${firstPage["h1"]}`);
+  }
 
   writeCSVReport(pages, "report.csv")
 }
